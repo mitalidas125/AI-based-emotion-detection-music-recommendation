@@ -1,28 +1,73 @@
+# 🎵 AI-Based Emotion Detection & Music Recommendation System
+
+## 📌 Overview
+This project detects a user’s emotional state based on typing behaviour and recommends suitable music accordingly.
+It uses basic Machine Learning techniques and a simple, explainable pipeline.
+
+This is an **educational / internship-level project**, not a production AI system.
+
+---
+
+## 🧠 How It Works
+1. User typing behaviour data is collected (speed, duration, patterns).
+2. Features are processed and passed to a trained ML model.
+3. The model predicts the emotion (Happy, Sad, Angry, Calm).
+4. Music is recommended based on the predicted emotion.
+
+---
+
+## 🚀 Features
+- Emotion detection using Machine Learning
+- Random Forest classifier
+- Simple and interpretable logic
+- Music recommendation based on emotion
+- Streamlit-based user interface
+
+---
+
+## 🛠️ Technologies Used
+- Python
+- Streamlit
+- Pandas
+- NumPy
+- Scikit-learn
+- Joblib
+
+---
+
+## 📂 Project Structure
+AI-based-emotion-detection-music-recommendation/
+│
+├── app.py
+├── README.md
+├── requirements.txt
+│
+├── data/
+│ └── typing_data.csv
+│
+├── model/
+│ └── emotion_model.pkl
+│
+├── screenshots/
+│ ├── ui.png
+│ └── result.png
+│
+└── .github/
 
 
-🎵 AI-Based Emotion Detection from Typing Behaviour & Music Recommendation System
+---
 
-This project uses Artificial Intelligence and Machine Learning to detect a user’s emotional state based on their typing behaviour patterns. The system analyzes features like:
 
-Typing speed
+---
 
-Total typing time
+## ⚙️ How to Run the Project
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+## 📸 Screenshots
 
-Characters per second
+### Application Interface
+![UI Screenshot](screenshots/ui.png)
 
-Word count
-
-Gap between key presses
-
-Using these features, the model classifies the user’s emotion into one of the following categories:
-
-Happy
-
-Sad
-
-Angry
-
-Calm
-
-Once the emotion is detected, the system automatically provides a music recommendation that matches the mood.
-
+### Emotion Detection & Music Recommendation
+![Result Screenshot](screenshots/result.png)
