@@ -1,0 +1,52 @@
+{
+  "best_model": "Random Forest",
+  "best_accuracy": 0.9917,
+  "features": [
+    "typing_speed_wpm",
+    "keypress_duration_ms",
+    "pause_duration_ms",
+    "error_rate",
+    "backspace_count",
+    "avg_word_length",
+    "sentence_length",
+    "exclamation_freq"
+  ],
+  "classes": [
+    "Angry",
+    "Calm",
+    "Happy",
+    "Sad"
+  ],
+  "comparison": {
+    "Random Forest": {
+      "test_accuracy": 0.9917,
+      "cv_mean": 0.9933,
+      "cv_std": 0.0057
+    },
+    "SVM": {
+      "test_accuracy": 0.9917,
+      "cv_mean": 0.9942,
+      "cv_std": 0.0073
+    },
+    "Gradient Boosting": {
+      "test_accuracy": 0.9917,
+      "cv_mean": 0.9842,
+      "cv_std": 0.0061
+    },
+    "Logistic Regression": {
+      "test_accuracy": 0.9875,
+      "cv_mean": 0.9933,
+      "cv_std": 0.0068
+    }
+  },
+  "feature_importance": {
+    "typing_speed_wpm": 0.1185,
+    "keypress_duration_ms": 0.1103,
+    "pause_duration_ms": 0.2247,
+    "error_rate": 0.104,
+    "backspace_count": 0.1229,
+    "avg_word_length": 0.0149,
+    "sentence_length": 0.0705,
+    "exclamation_freq": 0.2342
+  }
+}

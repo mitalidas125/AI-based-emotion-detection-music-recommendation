@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎵 EmotionTunes AI — Live Detector</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: white;
+    padding: 20px;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    background: linear-gradient(90deg, #6C63FF, #FF6584);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 140px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 14px;
+    color: white;
+    font-size: 1.05rem;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.3s;
+  }
+
+  textarea:focus { border-color: #6C63FF; }
+  textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .stat-box {
+    flex: 1;
+    min-width: 100px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+  .stat-value { font-size: 1.4rem; font-weight: 700; }
+
+  .analyze-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6C63FF, #FF6584);
+    color: white;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: transform 0.2s, opacity 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .analyze-btn:hover { transform: scale(1.02); opacity: 0.92; }
+  .analyze-btn:active { transform: scale(0.98); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .reset-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.95rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+
+  /* Result */
+  .result-card {
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .emotion-big {
+    text-align: center;
+    font-size: 4.5rem;
+    margin-bottom: 8px;
+  }
+
+  .emotion-name {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .emotion-desc {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+  }
+
+  .confidence-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .conf-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid;
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  .conf-label { font-size: 0.65rem; color: rgba(255,255,255,0.6); }
+
+  /* Probability bars */
+  .prob-row { margin: 6px 0; }
+  .prob-header { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px; }
+  .prob-bar-bg { background: rgba(255,255,255,0.1); border-radius: 6px; height: 10px; }
+  .prob-bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s ease; }
+
+  /* Music */
+  .music-section { margin-top: 20px; }
+  .music-section h4 { color: rgba(255,255,255,0.8); margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+  .genre-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 6px 14px;
+    margin: 4px;
+    font-size: 0.88rem;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .music-link {
+    display: block;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    text-decoration: none;
+    color: white;
+    border-left: 3px solid;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .music-link:hover { background: rgba(255,255,255,0.12); }
+
+  .music-link span { float: right; font-size: 0.8rem; opacity: 0.6; }
+
+  /* History */
+  .history-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .warning-msg {
+    background: rgba(255,200,0,0.15);
+    border: 1px solid rgba(255,200,0,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #FFD700;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255,255,255,0.6);
+    display: none;
+  }
+
+  .loading-dots::after {
+    content: '';
+    animation: dots 1.2s infinite;
+  }
+
+  @keyframes dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .section-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>🎵 EmotionTunes AI</h1>
+  <p class="subtitle">Type anything below — AI will automatically detect your emotion!</p>
+
+  <!-- Typing Box -->
+  <div class="card">
+    <h3>✍️ Type Here — Everything is Auto-Detected</h3>
+    <textarea id="typingBox"
+      placeholder="Type here in Hindi or English... Jaise: 'aaj ka din bahut achha tha! main bahut khush hun!' — Type naturally, at least 8-10 words!"></textarea>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">⏱️ TIME</div>
+        <div class="stat-value" id="timeVal" style="color:#6C63FF;">0s</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">📝 WORDS</div>
+        <div class="stat-value" id="wordsVal" style="color:#6C63FF;">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">🚀 SPEED</div>
+        <div class="stat-value" id="speedVal" style="color:#FFD700;">0 WPM</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">⌫ BACKSPACE</div>
+        <div class="stat-value" id="bsVal" style="color:#FF6584;">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">❗ EXCLAIM</div>
+        <div class="stat-value" id="exclVal" style="color:#FF9F43;">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">⏸️ AVG PAUSE</div>
+        <div class="stat-value" id="pauseVal" style="color:#26de81;">0ms</div>
+      </div>
+    </div>
+
+    <div id="warningMsg" class="warning-msg">⚠️ Please type at least 8 words for accurate detection!</div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeEmotion()">
+      🔍 Detect My Emotion Automatically!
+    </button>
+    <button class="reset-btn" onclick="resetAll()">🔄 Clear & Start Again</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loadingDiv">
+    <p style="font-size:1.2rem;">🧠 Analyzing your typing patterns<span class="loading-dots"></span></p>
+  </div>
+
+  <!-- Result -->
+  <div id="resultDiv" class="result-card card"></div>
+
+  <!-- History -->
+  <div id="historyDiv" style="display:none;" class="card">
+    <h3>📊 Emotion History</h3>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+const EMOTIONS = {
+  Happy: {
+    emoji: "😊",
+    color: "#FFD700",
+    gradient: "linear-gradient(135deg, #f7971e33, #ffd20033)",
+    border: "#FFD700",
+    desc: "You seem joyful and energetic!",
+    genres: ["Pop", "Dance", "Upbeat Indie", "Feel-Good R&B"],
+    yt: ["happy upbeat songs 2024", "feel good pop playlist", "dance hits 2024"],
+    spotify: "happy music"
+  },
+  Sad: {
+    emoji: "😢",
+    color: "#6495ED",
+    gradient: "linear-gradient(135deg, #4facfe22, #00f2fe22)",
+    border: "#6495ED",
+    desc: "You seem to be going through a tough time.",
+    genres: ["Soft Acoustic", "Lo-fi", "Classical", "Soul"],
+    yt: ["sad songs playlist", "emotional acoustic music", "lofi sad beats"],
+    spotify: "sad music"
+  },
+  Angry: {
+    emoji: "😠",
+    color: "#FF4500",
+    gradient: "linear-gradient(135deg, #f1271122, #f5af1922)",
+    border: "#FF4500",
+    desc: "You seem frustrated or intense right now.",
+    genres: ["Rock", "Metal", "Intense Rap", "EDM"],
+    yt: ["rock music intense", "angry rap playlist", "heavy metal hits"],
+    spotify: "angry music"
+  },
+  Calm: {
+    emoji: "😌",
+    color: "#90EE90",
+    gradient: "linear-gradient(135deg, #11998e22, #38ef7d22)",
+    border: "#90EE90",
+    desc: "You seem peaceful and relaxed.",
+    genres: ["Ambient", "Jazz", "Meditation", "Soft Classical"],
+    yt: ["calm relaxing music", "ambient meditation music", "peaceful jazz"],
+    spotify: "calm music"
+  }
+};
+
+// ── Typing Tracker ────────────────────────────────────────────────────────
+let startTime = null;
+let timerInterval = null;
+let backspaceCount = 0;
+let exclamCount = 0;
+let pauseTimes = [];
+let lastKeyTime = null;
+let history = [];
+
+const box = document.getElementById('typingBox');
+
+box.addEventListener('keydown', function(e) {
+  // Start timer
+  if (!startTime) {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 200);
+  }
+
+  // Backspace
+  if (e.key === 'Backspace') {
+    backspaceCount++;
+    document.getElementById('bsVal').textContent = backspaceCount;
+  }
+
+  // Exclamation
+  if (e.key === '!') {
+    exclamCount++;
+    document.getElementById('exclVal').textContent = exclamCount;
+  }
+
+  // Pause tracking
+  if (lastKeyTime) {
+    const gap = Date.now() - lastKeyTime;
+    if (gap > 300 && gap < 5000) {
+      pauseTimes.push(gap);
+      const avgPause = Math.round(pauseTimes.reduce((a,b)=>a+b,0) / pauseTimes.length);
+      document.getElementById('pauseVal').textContent = avgPause + 'ms';
+    }
+  }
+  lastKeyTime = Date.now();
+});
+
+box.addEventListener('input', function() {
+  const text = box.value;
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+  document.getElementById('wordsVal').textContent = words.length;
+
+  // Count exclamations from text directly
+  const exclInText = (text.match(/!/g) || []).length;
+  exclamCount = exclInText;
+  document.getElementById('exclVal').textContent = exclInText;
+
+  // Speed
+  if (startTime && words.length > 0) {
+    const mins = (Date.now() - startTime) / 60000;
+    const wpm = Math.round(words.length / mins);
+    document.getElementById('speedVal').textContent = wpm + ' WPM';
+  }
+});
+
+function updateTimer() {
+  if (startTime) {
+    const secs = ((Date.now() - startTime) / 1000).toFixed(1);
+    document.getElementById('timeVal').textContent = secs + 's';
+  }
+}
+
+// ── SMART DETECTION — Text + Punctuation based ───────────────────────────
+function predictEmotion(features, text) {
+  const t = text.toLowerCase();
+  let scores = { Happy: 0, Sad: 0, Angry: 0, Calm: 0 };
+
+  // ── STEP 1: Count ! marks — most reliable signal ──────────────────────
+  const exclCount = (text.match(/!/g) || []).length;
+  const questionCount = (text.match(/\?/g) || []).length;
+  const dotCount = (text.match(/\./g) || []).length;
+
+  if (exclCount >= 3) { scores.Angry += 8; scores.Happy += 5; }
+  else if (exclCount === 2) { scores.Happy += 8; scores.Angry += 4; }
+  else if (exclCount === 1) { scores.Happy += 6; }
+  else if (dotCount >= 3) { scores.Sad += 5; scores.Calm += 4; }
+
+  // ── STEP 2: Happy words ────────────────────────────────────────────────
+  const happyWords = [
+    "happy","joy","excited","amazing","wonderful","great","love","awesome",
+    "fantastic","excellent","perfect","best","good","nice","fun","yay",
+    "brilliant","superb","enjoy","enjoyed","glad","pleased","thrilled",
+    "khush","achha","acha","mast","zabardast","shandar","maja","pyaar",
+    "wah","waah","khushi","anand","shukriya","bahut achha","bahut khush",
+    "😊","😄","🎉","❤️","👍","🥳","😃"
+  ];
+
+  // ── STEP 3: Sad words ──────────────────────────────────────────────────
+  const sadWords = [
+    "sad","tired","heavy","alone","lonely","depressed","upset","cry","crying",
+    "miss","lost","hurt","pain","terrible","awful","horrible","down","low",
+    "unhappy","miserable","heartbroken","grief","sorrow","hopeless","helpless",
+    "thaka","thaki","udaas","dukh","dard","akela","akeli","bura","rone",
+    "ro raha","pareshan","mushkil","kuch nahi","koi nahi","thakan","nirasha",
+    "😢","😔","💔","😞","😿","😭"
+  ];
+
+  // ── STEP 4: Angry words ────────────────────────────────────────────────
+  const angryWords = [
+    "angry","frustrating","frustrated","annoyed","hate","worst","ridiculous",
+    "stupid","idiotic","useless","nonsense","done","fed up","irritated","mad",
+    "furious","outraged","rage","disgusting","pathetic","unacceptable","sick",
+    "gussa","gusse","pagal","bakwaas","bekar","galat","bilkul galat","tang",
+    "naraaz","krodh","kya bakwaas","chup karo","bahut bura","jhooth",
+    "😠","😡","🤬","👿","💢"
+  ];
+
+  // ── STEP 5: Calm words ─────────────────────────────────────────────────
+  const calmWords = [
+    "calm","peaceful","quiet","relax","relaxed","fine","okay","normal","steady",
+    "comfortable","easy","smooth","gentle","content","satisfied","balanced",
+    "cool","chill","composed","serene","tranquil","pleasant","alright",
+    "shant","theek","theek hai","sab theek","normal hai","aaram","sukoon",
+    "chain","acchi","sundar","😌","🧘","☮️","😇","🌸"
+  ];
+
+  // Count matches — give HIGH weight to text
+  const happyScore = happyWords.filter(w => t.includes(w)).length;
+  const sadScore = sadWords.filter(w => t.includes(w)).length;
+  const angryScore = angryWords.filter(w => t.includes(w)).length;
+  const calmScore = calmWords.filter(w => t.includes(w)).length;
+
+  scores.Happy += happyScore * 8;
+  scores.Sad += sadScore * 8;
+  scores.Angry += angryScore * 8;
+  scores.Calm += calmScore * 8;
+
+  // ── STEP 6: Backspace — only for Angry ────────────────────────────────
+  if (features.backspace >= 5) scores.Angry += 5;
+
+  // ── STEP 7: If NO words matched — use punctuation as main signal ───────
+  const totalWordScore = happyScore + sadScore + angryScore + calmScore;
+  if (totalWordScore === 0) {
+    if (exclCount >= 2) scores.Happy += 10;
+    else if (exclCount >= 1) scores.Happy += 6;
+    else if (dotCount >= 4) scores.Sad += 8;
+    else scores.Calm += 6;
+  }
+
+  // ── STEP 8: Make sure there's always a winner — no ties ───────────────
+  // Add tiny random noise to break ties
+  Object.keys(scores).forEach(k => scores[k] += Math.random() * 0.5);
+
+  // Normalize
+  const total = Object.values(scores).reduce((a,b) => a+b, 0) || 1;
+  let probs = {};
+  Object.keys(scores).forEach(k => probs[k] = Math.max(0, scores[k]) / total);
+
+  const winner = Object.keys(probs).reduce((a,b) => probs[a] > probs[b] ? a : b);
+  return { emotion: winner, probs };
+}
+
+// ── Analyze ───────────────────────────────────────────────────────────────
+function analyzeEmotion() {
+  const text = box.value.trim();
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+
+  // Warning
+  if (words.length < 8) {
+    const w = document.getElementById('warningMsg');
+    w.style.display = 'block';
+    setTimeout(() => w.style.display = 'none', 3000);
+    return;
+  }
+
+  // Loading
+  document.getElementById('loadingDiv').style.display = 'block';
+  document.getElementById('resultDiv').style.display = 'none';
+
+  setTimeout(() => {
+    // Calculate features from actual typing
+    const elapsed = startTime ? (Date.now() - startTime) / 60000 : 1;
+    const wpm = Math.round(words.length / elapsed) || 50;
+    const avgPause = pauseTimes.length > 0
+      ? Math.round(pauseTimes.reduce((a,b)=>a+b,0) / pauseTimes.length)
+      : 200;
+    const exclFreq = exclamCount / Math.max(1, words.length);
+    const errorRate = backspaceCount / Math.max(1, words.length * 5);
+
+    const features = { wpm, pause: avgPause, backspace: backspaceCount, exclaim: exclamCount, errorRate };
+    const { emotion, probs } = predictEmotion(features, text);
+    const confidence = Math.round(probs[emotion] * 100);
+    const config = EMOTIONS[emotion];
+
+    // Sentiment from text
+    const positiveWords = ["happy","great","love","good","wonderful","amazing","joy","excited","fantastic","excellent","awesome","perfect","beautiful","lovely","nice"];
+    const negativeWords = ["sad","bad","hate","terrible","awful","angry","upset","depressed","miserable","horrible","worst","tired","heavy","frustrated","done"];
+    const lowerWords = text.toLowerCase().split(/\s+/);
+    const posCount = lowerWords.filter(w => positiveWords.includes(w.replace(/[^a-z]/g,''))).length;
+    const negCount = lowerWords.filter(w => negativeWords.includes(w.replace(/[^a-z]/g,''))).length;
+    let sentiment = "Neutral 😐";
+    let sentColor = "#87CEEB";
+    if (posCount > negCount) { sentiment = "Positive 😊"; sentColor = "#90EE90"; }
+    else if (negCount > posCount) { sentiment = "Negative 😔"; sentColor = "#FF6B6B"; }
+
+    // Save history
+    const now = new Date();
+    const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+    history.push({ time: timeStr, emotion, confidence });
+
+    // Hide loading
+    document.getElementById('loadingDiv').style.display = 'none';
+
+    // Build result HTML
+    const sortedEmotions = Object.keys(probs).sort((a,b) => probs[b] - probs[a]);
+    const probBars = sortedEmotions.map(e => `
+      <div class="prob-row">
+        <div class="prob-header">
+          <span>${EMOTIONS[e].emoji} ${e}</span>
+          <span>${Math.round(probs[e]*100)}%</span>
+        </div>
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill" style="width:${Math.round(probs[e]*100)}%; background:${EMOTIONS[e].color};"></div>
+        </div>
+      </div>
+    `).join('');
+
+    const genreTags = config.genres.map(g => `<span class="genre-tag">${g}</span>`).join('');
+
+    const ytLinks = config.yt.map(q => `
+      <a class="music-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}"
+         target="_blank" style="border-color:#FF0000;">
+        ▶ ${q.replace(/\b\w/g,l=>l.toUpperCase())}
+        <span>YouTube →</span>
+      </a>
+    `).join('');
+
+    const spotifyLink = `
+      <a class="music-link" href="https://open.spotify.com/search/${encodeURIComponent(config.spotify)}"
+         target="_blank" style="border-color:#1DB954; margin-top:8px;">
+        🎧 Open in Spotify
+        <span style="color:#1DB954;">Spotify →</span>
+      </a>
+    `;
+
+    const resultDiv = document.getElementById('resultDiv');
+    resultDiv.style.background = config.gradient;
+    resultDiv.style.borderColor = config.border + '44';
+    resultDiv.innerHTML = `
+      <div class="emotion-big">${config.emoji}</div>
+      <div class="emotion-name" style="color:${config.color};">${emotion}</div>
+      <div class="emotion-desc">${config.desc}</div>
+
+      <div class="confidence-row">
+        <div class="conf-circle" style="border-color:${config.color}; color:${config.color};">
+          <div>${confidence}%</div>
+          <div class="conf-label">Confidence</div>
+        </div>
+        <div class="conf-circle" style="border-color:${sentColor}; color:${sentColor};">
+          <div style="font-size:0.9rem; font-weight:600;">${sentiment}</div>
+          <div class="conf-label">Sentiment</div>
+        </div>
+        <div class="conf-circle" style="border-color:#6C63FF; color:#6C63FF;">
+          <div>${wpm}</div>
+          <div class="conf-label">WPM</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">${probBars}</div>
+
+      <hr style="border-color:rgba(255,255,255,0.1); margin:16px 0;">
+
+      <div class="two-col">
+        <div class="music-section">
+          <h4>🎸 Genres</h4>
+          ${genreTags}
+        </div>
+        <div class="music-section">
+          <h4>🔗 Listen Now</h4>
+          ${ytLinks}
+          ${spotifyLink}
+        </div>
+      </div>
+    `;
+    resultDiv.style.display = 'block';
+
+    // Update history
+    updateHistory();
+
+  }, 900);
+}
+
+function updateHistory() {
+  if (history.length === 0) return;
+  const histDiv = document.getElementById('historyDiv');
+  const list = document.getElementById('historyList');
+  histDiv.style.display = 'block';
+
+  list.innerHTML = history.slice().reverse().map(h => `
+    <div class="history-item">
+      <span style="color:rgba(255,255,255,0.5);">${h.time}</span>
+      <span>${EMOTIONS[h.emotion].emoji} ${h.emotion}</span>
+      <span class="badge" style="background:${EMOTIONS[h.emotion].color}22; color:${EMOTIONS[h.emotion].color}; border:1px solid ${EMOTIONS[h.emotion].color}44;">
+        ${h.confidence}%
+      </span>
+    </div>
+  `).join('');
+}
+
+function resetAll() {
+  box.value = '';
+  startTime = null;
+  clearInterval(timerInterval);
+  backspaceCount = 0;
+  exclamCount = 0;
+  pauseTimes = [];
+  lastKeyTime = null;
+
+  ['timeVal','wordsVal'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('speedVal').textContent = '0 WPM';
+  document.getElementById('bsVal').textContent = '0';
+  document.getElementById('exclVal').textContent = '0';
+  document.getElementById('pauseVal').textContent = '0ms';
+  document.getElementById('resultDiv').style.display = 'none';
+  box.focus();
+}
+
+// Enter focus
+window.onload = () => box.focus();
+</script>
+</body>
+</html>
