@@ -12,11 +12,6 @@ Unlike face-based emotion detection, this system works entirely from **how you t
 
 ---
 
-## 🖥️ Screenshots
-
-> *(Add screenshots after running the app)*
-
----
 
 ## 🧠 How It Works
 
@@ -155,6 +150,7 @@ The app will open at `http://localhost:8501`
 
 **BCA Final Year Project** | 2023-26 
 Department of Computer Applications
+https://github.com/mitalidas125/AI-based-emotion-detection-music-recommendation/edit/main/README.md
 
 ---
 
