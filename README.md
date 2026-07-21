@@ -150,7 +150,8 @@ The app will open at `http://localhost:8501`
 
 **BCA Final Year Project** | 2023-26 
 Department of Computer Applications
-https://github.com/mitalidas125/AI-based-emotion-detection-music-recommendation/edit/main/README.md
+🚀 Live Demo
+Check out the live app here: https://mitalidas125-ai-based-emotion-detection-music-recomm-app-2h6x50.streamlit.app/
 
 ---
 
